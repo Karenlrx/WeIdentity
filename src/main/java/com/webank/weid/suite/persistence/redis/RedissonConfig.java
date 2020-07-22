@@ -1,10 +1,14 @@
 package com.webank.weid.suite.persistence.redis;
 
-import com.webank.weid.constant.RedisDriverConstant;
-import com.webank.weid.util.PropertyUtils;
+import java.util.Arrays;
+import java.util.List;
+
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.util.PropertyUtils;
 
 /**
  * redisson配置类.
@@ -12,6 +16,9 @@ import org.redisson.config.Config;
  * @author karenli 2020年7月3日
  */
 public class RedissonConfig {
+
+    private static final String redisurl = PropertyUtils.getProperty(
+            DataDriverConstant.REDISSON_URL);
 
     public RedissonConfig() {
     }
@@ -23,8 +30,7 @@ public class RedissonConfig {
      */
     public RedissonClient redissonSingleClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress(
-                PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL));
+        config.useSingleServer().setAddress(redisurl);
         RedissonClient client = Redisson.create(config);
         return client;
     }
@@ -39,31 +45,29 @@ public class RedissonConfig {
         Config config = new Config();
         //集群状态扫描间隔时间，单位是毫秒, 可以用"rediss://"来启用SSL连接
         try {
-            config.useClusterServers().setScanInterval(RedisDriverConstant.SCAN_INTERVAL)
+            config.useClusterServers().setScanInterval(DataDriverConstant.SCAN_INTERVAL)
                     .addNodeAddress(
-                            PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL)
-                                    .split(","))
+                            redisurl.split(","))
                     .setMasterConnectionMinimumIdleSize(
-                            RedisDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)
+                            DataDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)
                     .setMasterConnectionPoolSize(
-                            RedisDriverConstant.MASTER_CONNECTION_POOL_SIZE)
+                            DataDriverConstant.MASTER_CONNECTION_POOL_SIZE)
                     .setMasterConnectionMinimumIdleSize(
-                            RedisDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)
+                            DataDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)
                     .setMasterConnectionPoolSize(
-                            RedisDriverConstant.MASTER_CONNECTION_POOL_SIZE)
+                            DataDriverConstant.MASTER_CONNECTION_POOL_SIZE)
                     .setConnectTimeout(
-                            RedisDriverConstant.CONNECT_TIMEOUT)
+                            DataDriverConstant.CONNECT_TIMEOUT)
                     .setIdleConnectionTimeout(
-                            RedisDriverConstant.IDLE_CONNECTION_TIMEOUT)
-                    .setTimeout(RedisDriverConstant.TIMEOUT)
-                    .setRetryAttempts(RedisDriverConstant.RETRY_ATTEMPTS)
-                    .setRetryInterval(RedisDriverConstant.RETRY_INTERVAL);
+                            DataDriverConstant.IDLE_CONNECTION_TIMEOUT)
+                    .setTimeout(DataDriverConstant.TIMEOUT)
+                    .setRetryAttempts(DataDriverConstant.RETRY_ATTEMPTS)
+                    .setRetryInterval(DataDriverConstant.RETRY_INTERVAL);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         RedissonClient redisson = Redisson.create(config);
-
         return redisson;
     }
 
@@ -73,12 +77,12 @@ public class RedissonConfig {
      * @return 返回集群模式/单节点模式的redissonclient.
      */
     public RedissonClient redismodelRecognition() {
-        String redisurl = PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL);
-        if (redisurl.indexOf(",") >= 0) {
+
+        List<String> list = Arrays.asList(redisurl.split(","));
+        if (list.size() > 1) {
             return redissonClusterClient();
         } else {
             return redissonSingleClient();
         }
     }
 }
-
