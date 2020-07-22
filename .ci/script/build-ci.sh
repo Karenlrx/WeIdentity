@@ -11,6 +11,7 @@ export MYSQL_DATABASE=${2:-database}
 export MYSQL_USERNAME=${3:-username}
 export MYSQL_PASSWORD=${4:-password}
 export REDIS_ADDRESS=${5:-0.0.0.0:6379}
+export REDIS_PASSWORD=${6:-password}
 
 JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 
