@@ -38,6 +38,7 @@ import com.webank.weid.util.PropertyUtils;
  */
 public class RedissonConfig {
 
+    private static final Config config = new Config();
     //连接URL
     private static final String redisUrl = PropertyUtils.getProperty(
             DataDriverConstant.REDIS_URL);
@@ -54,7 +55,6 @@ public class RedissonConfig {
      */
     public RedissonClient redissonSingleClient() {
 
-        Config config = new Config();
         String redisPrefix = DataDriverConstant.REDIS_SINGLE;
         //数据库选择，默认为db0
         String databaseKey = redisPrefix + DataDriverConstant.DATABASE;
@@ -78,20 +78,8 @@ public class RedissonConfig {
      */
     public RedissonClient redissonClusterClient() {
 
-        Config config = new Config();
         //配置文件的前缀
         String redisPrefix = DataDriverConstant.REDIS_CLUSTER;
-        //Url添加redis://前缀
-        List<String> clusterNodes =new ArrayList<>();
-        for (int i = 0; i < redisNodes.size(); i++) {
-            clusterNodes.add("redis://" + redisNodes.get(i));
-        }
-        System.out.println(clusterNodes);
-        //读取配置文件中的password，默认为null
-        String passwd = null;
-        if (StringUtils.isNoneBlank(password)) {
-            passwd = password;
-        }
         //连接空闲超时时间
         String idleConnectionTimeoutKey =
                 redisPrefix + DataDriverConstant.IDLE_CONNECTION_TIMEOUT;
@@ -130,6 +118,17 @@ public class RedissonConfig {
         int masterConnPoolSize = Integer.parseInt(PropertyUtils.getProperty(
                 masterConnPoolSizeKey,
                 DataDriverConstant.MASTER_CONNECTION_POOL_SIZE_DEFAULT_VALUE));
+
+        //Url添加redis://前缀
+        List<String> clusterNodes = new ArrayList<>();
+        for (int i = 0; i < redisNodes.size(); i++) {
+            clusterNodes.add("redis://" + redisNodes.get(i));
+        }
+        //读取配置文件中的password，默认为null
+        String passwd = null;
+        if (StringUtils.isNoneBlank(password)) {
+            passwd = password;
+        }
 
         config.useClusterServers().addNodeAddress(clusterNodes.toArray(
                 new String[clusterNodes.size()]))
