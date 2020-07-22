@@ -33,9 +33,11 @@ function modify_config()
     export MYSQL_USERNAME=${MYSQL_USERNAME}
     export MYSQL_PASSWORD=${MYSQL_PASSWORD}
 	  export REDIS_ADDRESS=${REDIS_ADDRESS}
+	  export REDIS_PASSWORD=${REDIS_PASSWORD}
     export BLOCKCHIAN_NODE_INFO=${BLOCKCHIAN_NODE_INFO}
 
-    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${REDIS_ADDRESS}:${BLOCKCHIAN_NODE_INFO}'
+    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:$
+    {MYSQL_PASSWORD}:${REDIS_ADDRESS}:${REDIS_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${java_source_code_dir}/src/test/resources/
 
@@ -75,8 +77,10 @@ function gradle_build_sdk()
     echo $MYSQL_DATABASE
     echo $MYSQL_USERNAME
     echo $MYSQL_PASSWORD
-	  export REDIS_ADDRESS=${REDIS_ADDRESS}
-    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${REDIS_ADDRESS}:${BLOCKCHIAN_NODE_INFO}'
+	  echo $REDIS_ADDRESS
+	  echo $REDIS_PASSWORD
+    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:$
+    {MYSQL_PASSWORD}:${REDIS_ADDRESS}:${REDIS_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 
     echo "Begin to compile java code......"
