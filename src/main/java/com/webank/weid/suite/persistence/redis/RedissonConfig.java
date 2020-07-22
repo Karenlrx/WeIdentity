@@ -19,9 +19,11 @@
 
 package com.webank.weid.suite.persistence.redis;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -40,6 +42,8 @@ public class RedissonConfig {
     private static final String redisUrl = PropertyUtils.getProperty(
             DataDriverConstant.REDIS_URL);
 
+    private static final List<String> redisNodes = Arrays.asList(redisUrl.split(","));
+
     private static final String password = PropertyUtils.getProperty(
             DataDriverConstant.PASSWORD);
 
@@ -54,10 +58,14 @@ public class RedissonConfig {
         String redisPrefix = DataDriverConstant.REDIS_SINGLE;
         //数据库选择，默认为db0
         String databaseKey = redisPrefix + DataDriverConstant.DATABASE;
-        Integer database = Integer.parseInt(PropertyUtils.getProperty(
+        String passwd = null;
+        if (StringUtils.isNoneBlank(password)) {
+            passwd = password;
+        }
+        int database = Integer.parseInt(PropertyUtils.getProperty(
                 databaseKey, DataDriverConstant.DATABASE_DEFAULT_VALUE));
-        config.useSingleServer().setAddress(redisUrl)
-                .setPassword(password)
+        config.useSingleServer().setAddress("redis://" + redisUrl)
+                .setPassword(passwd)
                 .setDatabase(database);
         RedissonClient client = Redisson.create(config);
         return client;
@@ -71,7 +79,19 @@ public class RedissonConfig {
     public RedissonClient redissonClusterClient() {
 
         Config config = new Config();
+        //配置文件的前缀
         String redisPrefix = DataDriverConstant.REDIS_CLUSTER;
+        //Url添加redis://前缀
+        List<String> clusterNodes =new ArrayList<>();
+        for (int i = 0; i < redisNodes.size(); i++) {
+            clusterNodes.add("redis://" + redisNodes.get(i));
+        }
+        System.out.println(clusterNodes);
+        //读取配置文件中的password，默认为null
+        String passwd = null;
+        if (StringUtils.isNoneBlank(password)) {
+            passwd = password;
+        }
         //连接空闲超时时间
         String idleConnectionTimeoutKey =
                 redisPrefix + DataDriverConstant.IDLE_CONNECTION_TIMEOUT;
@@ -111,7 +131,9 @@ public class RedissonConfig {
                 masterConnPoolSizeKey,
                 DataDriverConstant.MASTER_CONNECTION_POOL_SIZE_DEFAULT_VALUE));
 
-        config.useClusterServers().addNodeAddress(redisUrl.split(","))
+        config.useClusterServers().addNodeAddress(clusterNodes.toArray(
+                new String[clusterNodes.size()]))
+                .setPassword(passwd)
                 .setIdleConnectionTimeout(idleConnectionTimeout)
                 .setConnectTimeout(connectTimeout)
                 .setTimeout(timeout)
@@ -131,8 +153,7 @@ public class RedissonConfig {
      */
     public RedissonClient redismodelRecognition() {
 
-        List<String> list = Arrays.asList(redisUrl.split(","));
-        if (list.size() > 1) {
+        if (redisNodes.size() > 1) {
             return redissonClusterClient();
         } else {
             return redissonSingleClient();

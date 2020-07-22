@@ -116,7 +116,6 @@ public final class DataDriverConstant {
     public static final String SLAVE_CONNECTION_POOL_SIZE_DEFAULT_VALUE = "64";
     public static final String MASTER_CONNECTION_MINIMUM_IDLE_SIZE_DEFAULT_VALUE = "10";
     public static final String MASTER_CONNECTION_POOL_SIZE_DEFAULT_VALUE = "64";
-    public static final String READ_MODE_DEFAULT_VALUE = "SLAVE";
 
     /**
      * jdbc url properties.

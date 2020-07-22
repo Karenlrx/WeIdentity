@@ -111,7 +111,7 @@ public class TestMysqlUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class TestMysqlUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class TestMysqlUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class TestMysqlUpdate extends TestBaseTransportation {
                 "datasource1:sdk_all_data_not_exist", id, data);
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class TestMysqlUpdate extends TestBaseTransportation {
         ResponseData<Integer> res = persistence.update("datasource1:null", id, data);
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(),
+        Assert.assertEquals(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(),
                 res.getErrorCode().intValue());
     }
 
