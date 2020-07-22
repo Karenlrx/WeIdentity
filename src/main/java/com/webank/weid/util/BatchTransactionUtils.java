@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -98,7 +98,7 @@ public class BatchTransactionUtils {
         if (!StringUtils.isBlank(secretKey)) {
             return secretKey;
         } else {
-            ResponseData<String> dbResp = getDataDriver().get(MysqlDriverConstant.DOMAIN_ENCRYPTKEY,
+            ResponseData<String> dbResp = getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY,
                 PropertyUtils.getProperty("blockchain.orgid"));
             Integer errorCode = dbResp.getErrorCode();
             if (errorCode != ErrorCode.SUCCESS.getCode()) {
@@ -175,7 +175,7 @@ public class BatchTransactionUtils {
      */
     private static boolean saveToDb(TransactionArgs transaction) {
 
-        ResponseData<Integer> dbResp = getDataDriver().saveTransaction(transaction);
+        ResponseData<Integer> dbResp = getDataDriver().addTransaction(transaction);
         if (dbResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return false;
         }
@@ -225,7 +225,7 @@ public class BatchTransactionUtils {
         //String encryptKey = CryptServiceFactory.getCryptService(CryptType.AES)
         //    .encrypt(privateKey, getKey());
         //ResponseData<Integer> dbResp = getDataDriver()
-        //    .saveOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
+        //    .addOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
         //Integer errorCode = dbResp.getErrorCode();
         //if (errorCode != ErrorCode.SUCCESS.getCode()) {
         //    logger.error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",

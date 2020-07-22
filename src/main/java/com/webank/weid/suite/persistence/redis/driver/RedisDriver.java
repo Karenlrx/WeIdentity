@@ -1,24 +1,24 @@
 package com.webank.weid.suite.persistence.redis.driver;
 
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.persistence.redis.DefaultValue;
+import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
 import com.webank.weid.util.DataToolUtils;
@@ -30,9 +30,9 @@ import com.webank.weid.util.DataToolUtils;
  */
 public class RedisDriver implements Persistence {
 
-    private static final Logger logger = LoggerFactory.getLogger(com.webank.weid.suite.persistence.redis.driver.RedisDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisDriver.class);
 
-    private static final Integer FAILED_STATUS = RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS;
+    private static final Integer FAILED_STATUS = DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS;
 
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
 
@@ -45,20 +45,19 @@ public class RedisDriver implements Persistence {
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.getHash(id);
-
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date date = new Date();
             Object[] datas = {data, date, date};
             return new RedisExecutor(redisDomain).execute(dataKey, datas);
         } catch (WeIdBaseException e) {
-            logger.error("[mysql->add] add the data error.", e);
+            logger.error("[redis->add] add the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
     @Override
-    public ResponseData<Integer> batchAdd(String domain, HashMap<String, String> keyValueList) {
+    public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList) {
 
         try {
             List<Object> idHashList = new ArrayList<>();
@@ -121,7 +120,6 @@ public class RedisDriver implements Persistence {
                     && response.getResult() != null) {
                 DefaultValue data = DataToolUtils.deserialize(
                         response.getResult(), DefaultValue.class);
-
                 //超过超时时间，log输出data超时
                 if (data != null && data.getExpire() != null
                         && data.getExpire().before(new Date())) {
@@ -132,8 +130,9 @@ public class RedisDriver implements Persistence {
                 if (data != null && StringUtils.isNotBlank(data.getData())) {
                     result.setResult(
                             new String(
-                                    data.getData().getBytes(StandardCharsets.ISO_8859_1),
-                                    StandardCharsets.UTF_8
+                                    data.getData().getBytes(
+                                            DataDriverConstant.STANDARDCHARSETS_ISO),
+                                    DataDriverConstant.STANDARDCHARSETS_UTF_8
                             )
                     );
                 }
@@ -185,7 +184,7 @@ public class RedisDriver implements Persistence {
     }
 
     @Override
-    public ResponseData<Integer> saveOrUpdate(String domain, String id, String data) {
+    public ResponseData<Integer> addOrUpdate(String domain, String id, String data) {
 
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
@@ -198,14 +197,14 @@ public class RedisDriver implements Persistence {
     }
 
     @Override
-    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs) {
+    public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs) {
 
         if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
             logger.error("[redis->add] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         try {
-            RedisDomain redisDomain = new RedisDomain(RedisDriverConstant.DOMAIN_DEFAULT_INFO);
+            RedisDomain redisDomain = new RedisDomain(DataDriverConstant.DOMAIN_DEFAULT_INFO);
             String datakey = transactionArgs.getRequestId();
             Object[] datas = {
                     transactionArgs.getRequestId(),

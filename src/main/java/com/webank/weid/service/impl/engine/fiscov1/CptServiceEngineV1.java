@@ -60,7 +60,7 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.CptController;
@@ -404,8 +404,8 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                this.getDataDriver().saveOrUpdate(
-                    MysqlDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
+                this.getDataDriver().addOrUpdate(
+                    DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
             if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {

@@ -19,11 +19,11 @@
 
 package com.webank.weid.suite.persistence.mysql.driver;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -34,13 +34,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.persistence.mysql.DefaultTable;
+import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
@@ -58,7 +58,7 @@ public class MysqlDriver implements Persistence {
 
     private static final String CHECK_TABLE_SQL =
         "SELECT table_name "
-            + MysqlDriverConstant.SQL_COLUMN_DATA
+            + DataDriverConstant.SQL_COLUMN_DATA
             + " FROM information_schema.TABLES "
             + " WHERE upper(table_name) = upper('$1')"
             + " and upper(table_schema) = upper('$2')";
@@ -79,7 +79,7 @@ public class MysqlDriver implements Persistence {
             + "PRIMARY KEY (`id`) "
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='the data table'";
 
-    private static final Integer FAILED_STATUS = MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS;
+    private static final Integer FAILED_STATUS = DataDriverConstant.SQL_EXECUTE_FAILED_STATUS;
 
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
 
@@ -115,8 +115,8 @@ public class MysqlDriver implements Persistence {
                 .executeQuery(SqlExecutor.SQL_QUERY, dataKey);
             if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                 && response.getResult() != null) {
-                DefaultTable tableData = DataToolUtils.deserialize(
-                    DataToolUtils.serialize(response.getResult()), DefaultTable.class);
+                DefaultValue tableData = DataToolUtils.deserialize(
+                    DataToolUtils.serialize(response.getResult()), DefaultValue.class);
                 if (tableData.getExpire() != null && tableData.getExpire().before(new Date())) {
                     logger.error("[mysql->get] the data is expire.");
                     return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.SQL_DATA_EXPIRE);
@@ -124,8 +124,8 @@ public class MysqlDriver implements Persistence {
                 if (StringUtils.isNotBlank(tableData.getData())) {
                     result.setResult(
                         new String(
-                            tableData.getData().getBytes(StandardCharsets.ISO_8859_1),
-                            StandardCharsets.UTF_8
+                            tableData.getData().getBytes(DataDriverConstant.STANDARDCHARSETS_ISO),
+                            DataDriverConstant.STANDARDCHARSETS_UTF_8
                         )
                     );
                 }
@@ -165,7 +165,7 @@ public class MysqlDriver implements Persistence {
      * @see com.webank.weid.connectivity.driver.DBDriver#batchAdd(java.util.List, java.util.List)
      */
     @Override
-    public ResponseData<Integer> batchAdd(String domain, HashMap<String, String> keyValueList) {
+    public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList) {
         try {
             List<Object> idHashList = new ArrayList<>();
             List<Object> dataList = new ArrayList<>();
@@ -277,11 +277,11 @@ public class MysqlDriver implements Persistence {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#saveOrUpdate(java.lang.String,
+     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addOrUpdate(java.lang.String,
      * java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Integer> saveOrUpdate(String domain, String id, String data) {
+    public ResponseData<Integer> addOrUpdate(String domain, String id, String data) {
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
@@ -294,18 +294,18 @@ public class MysqlDriver implements Persistence {
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#saveTransaction(
+     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addTransaction(
      * com.webank.weid.protocol.request.TransactionArgs)
      */
     @Override
-    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs) {
+    public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs) {
 
         if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
             logger.error("[mysql->add] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         try {
-            SqlDomain sqlDomain = new SqlDomain(MysqlDriverConstant.DOMAIN_DEFAULT_INFO);
+            SqlDomain sqlDomain = new SqlDomain(DataDriverConstant.DOMAIN_DEFAULT_INFO);
             Object[] datas = {
                 transactionArgs.getRequestId(),
                 transactionArgs.getMethod(),
