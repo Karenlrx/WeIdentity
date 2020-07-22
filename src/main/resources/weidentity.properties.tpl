@@ -50,16 +50,16 @@ datasource1.jdbc.minEvictableIdleTimeMillis=1800000
 # Redisson config
 # Support multiple data source configurations with comma-separated multiple data sources.
 # If you want to configure redis in cluster mode, enter multiple node addresses separated by commas.
-redis.url=redis://${REDIS_ADDRESS};
-redis.password=${REDIS_PASSWORD};
-redis_single.database=0;
-redis_cluster.idle_connection_timeout=10000;
-redis_cluster.connect_timeout=10000;
-redis_cluster.timeout=3000;
-redis_cluster.slave_connection_minimum_idle_size=10;
-redis_cluster.slave_connection_pool_size=64;
-redis_cluster.master_connection_minimum_idle_size=10;
-redis_cluster.master_connection_pool_size=64;
+redis.url=${REDIS_ADDRESS}
+redis.password=${REDIS_PASSWORD}
+redis_single.database=0
+redis_cluster.idle_connection_timeout=10000
+redis_cluster.connect_timeout=10000
+redis_cluster.timeout=3000
+redis_cluster.slave_connection_minimum_idle_size=10
+redis_cluster.slave_connection_pool_size=64
+redis_cluster.master_connection_minimum_idle_size=10
+redis_cluster.master_connection_pool_size=64
 
 
 #######################################################################################################

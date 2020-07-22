@@ -151,7 +151,9 @@ public class TestMysqlUpdate extends TestBaseTransportation {
                 "datasource1:sdk_all_data_not_exist", id, data);
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
+        Assert.assertEquals(
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(),
+                res.getErrorCode().intValue());
     }
 
     @Test
